@@ -147,7 +147,7 @@ const Gallery = () => {
                     {!item.isPlaceholder && item.imageUrl ? (
                       <img
                         src={item.imageUrl}
-                        alt={`${item.title} - Image ${(item.imageIndex || 0) + 1}`}
+                        alt={`${item.title}, view ${(item.imageIndex || 0) + 1}`}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         loading="lazy"
                       />

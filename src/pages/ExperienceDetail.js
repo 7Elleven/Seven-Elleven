@@ -281,7 +281,7 @@ const ExperienceDetail = () => {
                     >
                       <img
                         src={imageUrl}
-                        alt={`${experience.title} - Image ${index + 1}`}
+                        alt={`${experience.title}, view ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </button>
