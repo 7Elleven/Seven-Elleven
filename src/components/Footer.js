@@ -37,9 +37,11 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="inline-block mb-4">
-              <span className="text-2xl font-display font-bold gradient-text">
-                7ELLEVEN
-              </span>
+              <img
+                src="/logo2.png"
+                alt="SevenElleven logo"
+                className="h-16 w-auto object-contain"
+              />
             </Link>
             <p className="text-gray-400 mb-6 max-w-md">
               Where Football Meets Entertainment. A football culture platform creating premium experiences for fans, powered by community, and driven by unforgettable moments.

@@ -26,19 +26,20 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-dark-blue/95 backdrop-blur-md shadow-lg'
-          : 'bg-transparent'
+          ? 'bg-white/10 backdrop-blur-lg shadow-lg border-b border-white/10'
+          : 'bg-white/5 backdrop-blur-lg border-b border-white/5'
       }`}
     >
-      <div className="container-custom">
-        <div className="flex items-center justify-between h-20">
+      <div className="container-custom px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-24 md:h-28 lg:h-32">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-neon-blue blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <span className="relative text-3xl font-display font-bold gradient-text">
-                7ELLEVEN
-              </span>
+          <Link to="/" className="flex items-center space-x-6 group py-2 md:py-3">
+            <div className="relative flex items-center">
+              <img
+                src="/logo.png"
+                alt="SevenElleven logo"
+                className="relative h-14 md:h-16 lg:h-20 w-auto object-contain"
+              />
             </div>
           </Link>
 

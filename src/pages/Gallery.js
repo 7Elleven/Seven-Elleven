@@ -6,6 +6,7 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   useEffect(() => {
     const loadGalleryItems = async () => {
@@ -24,6 +25,9 @@ const Gallery = () => {
 
     loadGalleryItems();
   }, []);
+
+  // Flatten all images from filtered items and remove duplicates
+  // (Computed below as `filteredImages`.)
 
   // Get unique categories from gallery items (normalize for comparison)
   const categories = ['All', ...new Set(galleryItems.map(item => item.category?.trim()).filter(Boolean))];
@@ -68,6 +72,58 @@ const Gallery = () => {
       })
       .filter(Boolean); // Remove null entries (duplicates)
   });
+
+  const lightboxImages = filteredImages
+    .filter((item) => !item.isPlaceholder && item.imageUrl)
+    .map((item) => {
+      const key = item.uniqueId || `${item.id}-${item.imageUrl}`;
+      const alt =
+        item.title
+          ? `${item.title}, view ${(item.imageIndex || 0) + 1}`
+          : `Gallery image ${(item.imageIndex || 0) + 1}`;
+
+      return { key, src: item.imageUrl, alt };
+    });
+
+  const lightboxIndexByKey = new Map(
+    lightboxImages.map((img, idx) => [img.key, idx])
+  );
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setLightboxIndex(null);
+      if (e.key === 'ArrowLeft') {
+        setLightboxIndex((i) => (i === null ? i : Math.max(0, i - 1)));
+      }
+      if (e.key === 'ArrowRight') {
+        setLightboxIndex((i) =>
+          i === null ? i : Math.min(lightboxImages.length - 1, i + 1)
+        );
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxIndex, lightboxImages.length]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    if (lightboxImages.length === 0) {
+      setLightboxIndex(null);
+      return;
+    }
+    if (lightboxIndex > lightboxImages.length - 1) {
+      setLightboxIndex(lightboxImages.length - 1);
+    }
+  }, [lightboxIndex, lightboxImages.length]);
 
   return (
     <div className="pt-20">
@@ -133,10 +189,15 @@ const Gallery = () => {
               <p className="text-gray-400">No gallery items found in this category.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
               {filteredImages.map((item) => {
                 // Use the uniqueId we created for each image
                 const uniqueKey = item.uniqueId || `${item.id}-${item.imageIndex || 0}`;
+                const lightboxKey = item.uniqueId || `${item.id}-${item.imageUrl}`;
+                const imageAlt =
+                  item.title
+                    ? `${item.title}, view ${(item.imageIndex || 0) + 1}`
+                    : `Gallery image ${(item.imageIndex || 0) + 1}`;
                 
                 return (
                   <div
@@ -145,12 +206,23 @@ const Gallery = () => {
                   >
                     {/* Image or Placeholder */}
                     {!item.isPlaceholder && item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={`${item.title}, view ${(item.imageIndex || 0) + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        loading="lazy"
-                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLightboxIndex(
+                            lightboxIndexByKey.get(lightboxKey) ?? 0
+                          )
+                        }
+                        className="block w-full h-full focus:outline-none"
+                        aria-label={`Open image: ${imageAlt}`}
+                      >
+                        <img
+                          src={item.imageUrl}
+                          alt={imageAlt}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-zoom-in"
+                          loading="lazy"
+                        />
+                      </button>
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-accent-blue/30 via-dark-blue-light to-dark-blue flex items-center justify-center">
                         <div className="text-6xl opacity-30 group-hover:opacity-50 transition-opacity">
@@ -160,10 +232,10 @@ const Gallery = () => {
                     )}
 
                     {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark-blue via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-dark-blue via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                     {/* Image Info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                       {item.category && (
                         <div className="text-xs text-neon-blue font-semibold mb-1">
                           {item.category}
@@ -184,6 +256,92 @@ const Gallery = () => {
           )}
         </div>
       </section>
+
+      {/* Lightbox Overlay */}
+      {lightboxIndex !== null && lightboxImages[lightboxIndex] && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightboxIndex(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex(null);
+            }}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center transition-colors"
+            aria-label="Close fullscreen image"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {lightboxIndex > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((i) => (i === null ? i : Math.max(0, i - 1)));
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center transition-colors"
+              aria-label="Previous image"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          {lightboxIndex < lightboxImages.length - 1 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((i) =>
+                  i === null ? i : Math.min(lightboxImages.length - 1, i + 1)
+                );
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center transition-colors"
+              aria-label="Next image"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+
+          <img
+            src={lightboxImages[lightboxIndex].src}
+            alt={lightboxImages[lightboxIndex].alt || 'Fullscreen gallery image'}
+            className="max-w-[95vw] max-h-[90vh] object-contain cursor-zoom-out select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
     </div>
   );
