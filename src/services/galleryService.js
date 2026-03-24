@@ -1,43 +1,44 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
-export const fetchGalleryItems = async () => {
+export const fetchGalleryImagesByCategory = async (categoryName) => {
+  if (!categoryName) {
+    return [];
+  }
+
   try {
     const galleryRef = collection(db, 'gallery');
-    // Try to order by createdAt, but if it fails, just get all items
-    let q;
-    try {
-      q = query(galleryRef, orderBy('createdAt', 'desc'));
-    } catch (e) {
-      // If createdAt doesn't exist or isn't indexed, just get all items
-      q = query(galleryRef);
-    }
-    
-    const querySnapshot = await getDocs(q);
-    const galleryItems = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      galleryItems.push({
-        id: doc.id,
-        ...data,
-      });
-    });
-    
-    // Sort by createdAt if available (fallback for non-indexed fields)
-    galleryItems.sort((a, b) => {
-      if (a.createdAt && b.createdAt) {
-        const aTime = a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime();
-        const bTime = b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime();
-        return bTime - aTime;
+    const exactMatchQuery = query(galleryRef, where('category', '==', categoryName));
+    const querySnapshot = await getDocs(exactMatchQuery);
+
+    const exactMatchImages = [];
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (Array.isArray(data.images)) {
+        exactMatchImages.push(...data.images.filter(Boolean));
       }
-      return 0;
     });
-    
-    return galleryItems;
+
+    if (exactMatchImages.length > 0) {
+      return Array.from(new Set(exactMatchImages));
+    }
+
+    // Fallback: handle accidental casing/spacing differences in category values.
+    const allSnapshot = await getDocs(galleryRef);
+    const normalizedTitle = categoryName.trim().toLowerCase();
+    const fallbackImages = [];
+
+    allSnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const normalizedCategory = (data.category || '').trim().toLowerCase();
+      if (normalizedCategory === normalizedTitle && Array.isArray(data.images)) {
+        fallbackImages.push(...data.images.filter(Boolean));
+      }
+    });
+
+    return Array.from(new Set(fallbackImages));
   } catch (error) {
-    console.error('Error fetching gallery items:', error);
+    console.error('Error fetching gallery images by category:', error);
     throw error;
   }
 };
-

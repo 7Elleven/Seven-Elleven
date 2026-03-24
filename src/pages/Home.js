@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import EventCard from '../components/EventCard';
 import { fetchExperiences } from '../services/experiencesService';
 
+const BOOKING_URL = 'https://sevenellevenke.hustlesasa.shop';
+
 const Home = () => {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,9 +60,14 @@ const Home = () => {
               <Link to="/experiences" className="btn-primary">
                 View Experiences
               </Link>
-              <Link to="/book" className="btn-secondary">
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
                 Book an Experience
-              </Link>
+              </a>
             </div>
           </div>
         </div>

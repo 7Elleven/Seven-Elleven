@@ -27,7 +27,10 @@ const EventCard = ({ event }) => {
   const showImage = imageUrl && !imageError;
 
   return (
-    <div className="bg-dark-blue-light rounded-xl overflow-hidden card-hover border border-accent-blue/20 group">
+    <Link
+      to={`/experiences/${event.id}`}
+      className="bg-dark-blue-light rounded-xl overflow-hidden card-hover border border-accent-blue/20 group block cursor-pointer"
+    >
       {/* Event Image */}
       <div className="relative h-48 overflow-hidden">
         {showImage ? (
@@ -78,10 +81,7 @@ const EventCard = ({ event }) => {
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <span>👥 {event.attendees || 'TBA'}</span>
           </div>
-          <Link
-            to={`/experiences/${event.id}`}
-            className="text-accent-blue hover:text-neon-blue font-semibold text-sm transition-colors flex items-center space-x-1"
-          >
+          <span className="text-accent-blue hover:text-neon-blue font-semibold text-sm transition-colors flex items-center space-x-1">
             <span>Learn More</span>
             <svg
               className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
@@ -96,10 +96,10 @@ const EventCard = ({ event }) => {
                 d="M9 5l7 7-7 7"
               />
             </svg>
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

@@ -8,7 +8,6 @@ const Footer = () => {
     company: [
       { path: '/about', label: 'About Us' },
       { path: '/experiences', label: 'Experiences' },
-      { path: '/gallery', label: 'Gallery' },
       { path: '/contact', label: 'Contact' },
     ],
     social: [

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchExperienceById } from '../services/experiencesService';
+import { fetchGalleryImagesByCategory } from '../services/galleryService';
+
+const BOOKING_URL = 'https://sevenellevenke.hustlesasa.shop';
 
 const ExperienceDetail = () => {
   const { id } = useParams();
@@ -8,8 +11,13 @@ const ExperienceDetail = () => {
   const [experience, setExperience] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [slideshowImageIndex, setSlideshowImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [galleryError, setGalleryError] = useState(null);
+  const [fullscreenImageIndex, setFullscreenImageIndex] = useState(null);
+  const [fullscreenImages, setFullscreenImages] = useState([]);
 
   useEffect(() => {
     const loadExperience = async () => {
@@ -31,6 +39,30 @@ const ExperienceDetail = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const loadGallery = async () => {
+      if (!experience || !experience.title) {
+        setGalleryImages([]);
+        setGalleryError(null);
+        return;
+      }
+
+      try {
+        setGalleryLoading(true);
+        const data = await fetchGalleryImagesByCategory(experience.title);
+        setGalleryImages(data);
+        setGalleryError(null);
+      } catch (err) {
+        console.error('Error loading gallery images:', err);
+        setGalleryError('Failed to load gallery images.');
+      } finally {
+        setGalleryLoading(false);
+      }
+    };
+
+    loadGallery();
+  }, [experience]);
+
   // Auto-scroll images
   useEffect(() => {
     if (!experience || !experience.images || experience.images.length <= 1 || isPaused) {
@@ -38,14 +70,52 @@ const ExperienceDetail = () => {
     }
 
     const interval = setInterval(() => {
-      setSelectedImageIndex((prevIndex) => {
+      setSlideshowImageIndex((prevIndex) => {
         const nextIndex = (prevIndex + 1) % experience.images.length;
         return nextIndex;
       });
-    }, 5000); // Change image every 5 seconds
+    }, 2500); // Change image every 2.5 seconds
 
     return () => clearInterval(interval);
   }, [experience, isPaused]);
+
+  useEffect(() => {
+    if (fullscreenImageIndex === null) {
+      return;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setFullscreenImageIndex(null);
+        setFullscreenImages([]);
+      }
+      if (event.key === 'ArrowLeft') {
+        setFullscreenImageIndex((prevIndex) => {
+          if (prevIndex === null) return prevIndex;
+          return Math.max(0, prevIndex - 1);
+        });
+      }
+      if (event.key === 'ArrowRight') {
+        setFullscreenImageIndex((prevIndex) => {
+          if (prevIndex === null) return prevIndex;
+          return Math.min(fullscreenImages.length - 1, prevIndex + 1);
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [fullscreenImageIndex, fullscreenImages.length]);
+
+  const images = experience?.images || [];
+  const slideshowImages = galleryImages.length > 0 ? galleryImages : images;
+  const currentImage = slideshowImages[slideshowImageIndex];
+
+  useEffect(() => {
+    if (slideshowImageIndex > slideshowImages.length - 1) {
+      setSlideshowImageIndex(0);
+    }
+  }, [slideshowImageIndex, slideshowImages.length]);
 
   const getStatusBadge = (status) => {
     const statusStyles = {
@@ -100,26 +170,23 @@ const ExperienceDetail = () => {
     );
   }
 
-  const images = experience.images || [];
-  const currentImage = images[selectedImageIndex];
-
   return (
-    <div className="pt-20">
+    <div className="pt-24 md:pt-28 lg:pt-32">
       {/* Hero Image Section */}
-      <section 
+      <section
         className="relative h-[60vh] min-h-[500px] overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         {currentImage ? (
           <div className="relative w-full h-full">
-            {images.map((imageUrl, index) => (
+            {slideshowImages.map((imageUrl, index) => (
               <img
                 key={index}
                 src={imageUrl}
                 alt={`${experience.title} - ${index + 1}`}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                  selectedImageIndex === index ? 'opacity-100' : 'opacity-0'
+                  slideshowImageIndex === index ? 'opacity-100' : 'opacity-0'
                 }`}
               />
             ))}
@@ -129,10 +196,74 @@ const ExperienceDetail = () => {
             <div className="text-9xl opacity-20">⚽</div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-blue via-dark-blue/50 to-transparent"></div>
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-dark-blue/40 via-transparent to-dark-blue/40" />
+
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-14 -left-16 w-72 h-72 rounded-full bg-neon-blue/20 blur-3xl" />
+          <div className="absolute -bottom-16 -right-10 w-80 h-80 rounded-full bg-accent-blue/25 blur-3xl" />
+        </div>
+
+        <div className="absolute bottom-8 left-6 right-6 sm:left-10 sm:right-10 lg:left-16 lg:right-16 z-10">
+          <div className="max-w-3xl">
+            <p className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-neon-blue mb-2">
+              SevenElleven Experience
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white leading-tight drop-shadow-md">
+              {experience.title}
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-gray-200 text-sm sm:text-base">
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-accent-blue"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span>{experience.date}</span>
+              </div>
+              {experience.location && (
+                <div className="flex items-center space-x-2">
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-accent-blue"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span>{experience.location}</span>
+                </div>
+              )}
+            </div>
+            <p className="mt-3 text-sm sm:text-base text-gray-200">
+              {galleryImages.length > 0
+                ? 'Showcasing event highlights from the gallery.'
+                : 'Showcasing official posters for this experience.'}
+            </p>
+          </div>
+        </div>
+
         {/* Back Button */}
-        <div className="absolute top-8 left-8">
+        <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20">
           <button
             onClick={() => navigate(-1)}
             className="bg-dark-blue/80 backdrop-blur-md text-white px-4 py-2 rounded-lg hover:bg-dark-blue transition-colors flex items-center space-x-2"
@@ -155,104 +286,16 @@ const ExperienceDetail = () => {
         </div>
 
         {/* Status Badge */}
-        <div className="absolute top-8 right-8">
+        <div className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20">
           {getStatusBadge(experience.status)}
         </div>
 
-        {/* Image Navigation */}
-        {images.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setSelectedImageIndex(index);
-                  setIsPaused(true);
-                  // Resume autoscroll after 3 seconds of manual selection
-                  setTimeout(() => setIsPaused(false), 3000);
-                }}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  selectedImageIndex === index
-                    ? 'bg-white w-8'
-                    : 'bg-white/50 hover:bg-white/75'
-                }`}
-                aria-label={`View image ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Content Section */}
       <section className="section-padding bg-dark-blue">
         <div className="container-custom">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-4">
-                <span className="gradient-text">{experience.title}</span>
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-gray-300">
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-5 h-5 text-accent-blue"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span>{experience.date}</span>
-                </div>
-                {experience.location && (
-                  <div className="flex items-center space-x-2">
-                    <svg
-                      className="w-5 h-5 text-accent-blue"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <span>{experience.location}</span>
-                  </div>
-                )}
-                {experience.attendees && (
-                  <div className="flex items-center space-x-2">
-                    <svg
-                      className="w-5 h-5 text-accent-blue"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                    <span>{experience.attendees}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="max-w-6xl mx-auto">
 
             {/* Description */}
             {experience.description && (
@@ -267,14 +310,17 @@ const ExperienceDetail = () => {
             {/* Image Gallery */}
             {images.length > 1 && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">Gallery</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Posters</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {images.map((imageUrl, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedImageIndex(index)}
+                      onClick={() => {
+                        setFullscreenImages(images);
+                        setFullscreenImageIndex(index);
+                      }}
                       className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === index
+                        slideshowImageIndex === index
                           ? 'border-neon-blue scale-105'
                           : 'border-accent-blue/20 hover:border-accent-blue/50'
                       }`}
@@ -290,6 +336,41 @@ const ExperienceDetail = () => {
               </div>
             )}
 
+            {experience.status === 'past' && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold text-white mb-6">Gallery</h2>
+                {galleryLoading ? (
+                  <div className="text-gray-400">Loading gallery...</div>
+                ) : galleryError ? (
+                  <div className="text-red-400">{galleryError}</div>
+                ) : galleryImages.length === 0 ? (
+                  <div className="text-gray-400">No gallery images found for this experience yet.</div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5">
+                    {galleryImages.map((imageUrl, index) => (
+                      <button
+                        key={`gallery-${index}`}
+                        type="button"
+                        onClick={() => {
+                          setFullscreenImages(galleryImages);
+                          setFullscreenImageIndex(index);
+                        }}
+                        className="group relative aspect-square rounded-xl overflow-hidden border border-accent-blue/20"
+                        aria-label={`Open gallery image ${index + 1}`}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${experience.title}, gallery view ${index + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* CTA Section */}
             <div className="bg-dark-blue-light p-8 rounded-xl border border-accent-blue/20">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -302,9 +383,16 @@ const ExperienceDetail = () => {
                   </p>
                 </div>
                 <div className="flex gap-4">
-                  <Link to="/contact" className="btn-primary">
-                    Book Now
-                  </Link>
+                  {experience.status !== 'past' && (
+                    <a
+                      href={BOOKING_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                    >
+                      Book Now
+                    </a>
+                  )}
                   <Link to="/experiences" className="btn-secondary">
                     View All Experiences
                   </Link>
@@ -314,6 +402,68 @@ const ExperienceDetail = () => {
           </div>
         </div>
       </section>
+
+      {fullscreenImageIndex !== null && fullscreenImages[fullscreenImageIndex] && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-3 sm:p-6"
+          onClick={() => {
+            setFullscreenImageIndex(null);
+            setFullscreenImages([]);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Fullscreen photo viewer"
+        >
+          <button
+            onClick={() => {
+              setFullscreenImageIndex(null);
+              setFullscreenImages([]);
+            }}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/15 hover:bg-white/25 text-white rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-2xl leading-none transition-colors"
+            aria-label="Close fullscreen photo"
+          >
+            &times;
+          </button>
+          {fullscreenImageIndex > 0 && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setFullscreenImageIndex((prevIndex) => {
+                  if (prevIndex === null) return prevIndex;
+                  return Math.max(0, prevIndex - 1);
+                });
+              }}
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/25 text-white rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-2xl leading-none transition-colors"
+              aria-label="Previous image"
+            >
+              &#8249;
+            </button>
+          )}
+          {fullscreenImageIndex < fullscreenImages.length - 1 && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setFullscreenImageIndex((prevIndex) => {
+                  if (prevIndex === null) return prevIndex;
+                  return Math.min(fullscreenImages.length - 1, prevIndex + 1);
+                });
+              }}
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 bg-white/15 hover:bg-white/25 text-white rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-2xl leading-none transition-colors"
+              aria-label="Next image"
+            >
+              &#8250;
+            </button>
+          )}
+          <img
+            src={fullscreenImages[fullscreenImageIndex]}
+            alt={`${experience.title} fullscreen view ${fullscreenImageIndex + 1}`}
+            className="max-w-full max-h-[90vh] sm:max-h-[92vh] object-contain rounded-lg"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

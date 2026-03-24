@@ -6,7 +6,6 @@ import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import About from './pages/About';
 import Experiences from './pages/Events';
-import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import ExperienceDetail from './pages/ExperienceDetail';
 import NoExperience from './pages/NoExperience';
@@ -25,7 +24,6 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/experiences" element={<Experiences />} />
             <Route path="/experiences/:id" element={<ExperienceDetail />} />
-            <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/book" element={<NoExperience />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
