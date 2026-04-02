@@ -63,21 +63,23 @@ const ExperienceDetail = () => {
     loadGallery();
   }, [experience]);
 
+  const slideshowLength = Math.min(galleryImages.length, 10);
+
   // Auto-scroll images
   useEffect(() => {
-    if (!experience || !experience.images || experience.images.length <= 1 || isPaused) {
+    if (slideshowLength <= 1 || isPaused) {
       return;
     }
 
     const interval = setInterval(() => {
       setSlideshowImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % experience.images.length;
+        const nextIndex = (prevIndex + 1) % slideshowLength;
         return nextIndex;
       });
     }, 2500); // Change image every 2.5 seconds
 
     return () => clearInterval(interval);
-  }, [experience, isPaused]);
+  }, [slideshowLength, isPaused]);
 
   useEffect(() => {
     if (fullscreenImageIndex === null) {
@@ -108,8 +110,8 @@ const ExperienceDetail = () => {
   }, [fullscreenImageIndex, fullscreenImages.length]);
 
   const images = experience?.images || [];
-  const slideshowImages = galleryImages.length > 0 ? galleryImages : images;
-  const currentImage = slideshowImages[slideshowImageIndex];
+  const slideshowImages = galleryImages.slice(0, 10);
+  const hasSlideshow = slideshowImages.length > 0;
 
   useEffect(() => {
     if (slideshowImageIndex > slideshowImages.length - 1) {
@@ -178,7 +180,7 @@ const ExperienceDetail = () => {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {currentImage ? (
+        {hasSlideshow ? (
           <div className="relative w-full h-full">
             {slideshowImages.map((imageUrl, index) => (
               <img
@@ -191,11 +193,7 @@ const ExperienceDetail = () => {
               />
             ))}
           </div>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-accent-blue/20 to-dark-blue-light flex items-center justify-center">
-            <div className="text-9xl opacity-20">⚽</div>
-          </div>
-        )}
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-dark-blue/40 via-transparent to-dark-blue/40" />
 
@@ -257,7 +255,7 @@ const ExperienceDetail = () => {
             <p className="mt-3 text-sm sm:text-base text-gray-200">
               {galleryImages.length > 0
                 ? 'Showcasing event highlights from the gallery.'
-                : 'Showcasing official posters for this experience.'}
+                : 'Gallery highlights will be available soon.'}
             </p>
           </div>
         </div>

@@ -172,6 +172,17 @@ const About = () => {
                 role: 'Managing Director',
                 description: '4+ years creating unforgettable fan experiences.',
               },
+              {
+                name: 'Dennis Mango',
+                role: 'Head of ICT',
+                description: 'Oversees ICT infrastructure and technology operations.',
+              },
+              {
+                name: 'Alvin Sang',
+                role: 'Branding Partner',
+                description:
+                  'Experienced in delivering strong, clean and effective branding.',
+              },
     
             ].map((member, index) => (
               <div
