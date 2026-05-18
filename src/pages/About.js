@@ -12,11 +12,11 @@ const About = () => {
         </div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
               <span className="gradient-text">About</span>{' '}
               <span className="text-white">SevenElleven</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300">
               We're passionate about bringing football fans together through
               extraordinary experiences.
             </p>
@@ -29,10 +29,10 @@ const About = () => {
         <div className="container-custom">
           <div className="max-w-4xl mx-auto">
             <div className="mb-16">
-              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
                 Our <span className="gradient-text">Story</span>
               </h2>
-              <div className="space-y-6 text-gray-300 text-lg leading-relaxed">
+              <div className="space-y-6 text-gray-300 text-base leading-relaxed">
                 <p>
                 SevenElleven was born from a simple idea: football deserves better experiences. 
                 What started as a shared passion among football lovers and event professionals 
@@ -61,16 +61,16 @@ const About = () => {
             {/* Mission & Vision */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
               <div className="bg-dark-blue-light p-8 rounded-xl border border-accent-blue/20">
-                <div className="text-5xl mb-4">🎯</div>
-                <h3 className="text-2xl font-bold text-white mb-4">Our Mission</h3>
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-bold text-white mb-4">Our Mission</h3>
                 <p className="text-gray-400">
                 To build a vibrant, inclusive community where talent & culture come alive — creating meaningful 
                 experiences that empower and connect people while turning shared passion into lasting impact.
                 </p>
               </div>
               <div className="bg-dark-blue-light p-8 rounded-xl border border-accent-blue/20">
-                <div className="text-5xl mb-4">🌟</div>
-                <h3 className="text-2xl font-bold text-white mb-4">Our Vision</h3>
+                <div className="text-4xl mb-4">🌟</div>
+                <h3 className="text-xl font-bold text-white mb-4">Our Vision</h3>
                 <p className="text-gray-400">
                 To shape a future where football is more than a game — it is a cultural language 
                 that unites communities, unlocks opportunity, and builds platforms where 
@@ -86,10 +86,10 @@ const About = () => {
       <section className="section-padding bg-dark-blue-light">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Why <span className="gradient-text">SevenElleven</span> Stands Out
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-base max-w-2xl mx-auto">
               What makes us different in the world of football entertainment.
             </p>
           </div>
@@ -138,7 +138,7 @@ const About = () => {
                 className="bg-dark-blue p-6 rounded-xl border border-accent-blue/20 card-hover"
               >
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-white mb-3">
+                <h3 className="text-lg font-bold text-white mb-3">
                   {feature.title}
                 </h3>
                 <p className="text-gray-400">{feature.description}</p>
@@ -152,10 +152,10 @@ const About = () => {
       <section className="section-padding">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               The <span className="gradient-text">Team</span>
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-base max-w-2xl mx-auto">
             A driven team of football fanatics, event experts, and experience builders.
             </p>
           </div>
@@ -192,7 +192,7 @@ const About = () => {
                 <div className="w-24 h-24 bg-gradient-to-br from-accent-blue to-neon-blue rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
                   {member.name.charAt(0)}
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">{member.name}</h3>
+                <h3 className="text-lg font-bold text-white mb-2">{member.name}</h3>
                 <p className="text-accent-blue mb-4">{member.role}</p>
                 <p className="text-gray-400 text-sm">{member.description}</p>
               </div>
@@ -204,10 +204,10 @@ const About = () => {
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-accent-blue/20 via-dark-blue-light to-accent-blue/20">
         <div className="container-custom text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
             Join Us on This <span className="gradient-text">Journey</span>
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             Whether you're a fan looking for the ultimate experience or a partner
             seeking collaboration, we'd love to connect.
           </p>

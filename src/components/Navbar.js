@@ -144,7 +144,7 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`py-3 px-4 rounded-lg text-xl font-semibold transition-colors ${
+                className={`py-3 px-4 rounded-lg text-lg font-semibold transition-colors ${
                   location.pathname === link.path
                     ? 'bg-accent-blue text-white'
                     : 'text-white hover:bg-dark-blue-light'

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import { startGalleryPrefetch } from './services/galleryPrefetchService';
 import Home from './pages/Home';
 import About from './pages/About';
 import Experiences from './pages/Events';
@@ -13,6 +14,10 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
 function App() {
+  useEffect(() => {
+    startGalleryPrefetch();
+  }, []);
+
   return (
     <Router>
       <ScrollToTop />

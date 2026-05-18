@@ -47,11 +47,11 @@ const Experiences = () => {
         </div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
               <span className="gradient-text">Football</span>{' '}
               <span className="text-white">Experiences</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300">
               Discover our upcoming tournaments, fan experiences, and live match
               activations.
             </p>
@@ -86,7 +86,7 @@ const Experiences = () => {
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">⚠️</div>
+              <div className="text-5xl mb-4">⚠️</div>
               <p className="text-red-400 mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
@@ -103,8 +103,8 @@ const Experiences = () => {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">⚽</div>
-              <h3 className="text-2xl font-bold text-white mb-2">
+              <div className="text-5xl mb-4">⚽</div>
+              <h3 className="text-xl font-bold text-white mb-2">
                 No Experiences Found
               </h3>
               <p className="text-gray-400">
@@ -118,10 +118,10 @@ const Experiences = () => {
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-accent-blue/20 via-dark-blue-light to-accent-blue/20">
         <div className="container-custom text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
             Want to <span className="gradient-text">Partner</span> With Us?
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             We're always looking for exciting collaborations and partnerships. Let's
             create something amazing together.
           </p>

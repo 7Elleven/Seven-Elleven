@@ -11,11 +11,11 @@ const TermsOfService = () => {
         </div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
               <span className="gradient-text">Terms of</span>{' '}
               <span className="text-white">Service</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300">
               Effective Date: January 10, 2026
             </p>
           </div>
@@ -28,12 +28,12 @@ const TermsOfService = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-dark-blue-light p-8 md:p-12 rounded-xl border border-accent-blue/20">
               <div className="space-y-8 text-gray-300 leading-relaxed">
-                <p className="text-lg">
+                <p className="text-base">
                   These Terms of Service ("Terms") govern your use of the SevenElleven website, services, events, and related content. By using our website or attending our events, you agree to these Terms.
                 </p>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     1. Use of Services
                   </h2>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -44,7 +44,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     2. Event Attendance
                   </h2>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -54,7 +54,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     3. Subscriptions and Payments
                   </h2>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -65,7 +65,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     4. Intellectual Property
                   </h2>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -75,7 +75,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     5. User Conduct
                   </h2>
                   <p className="mb-4">You agree not to:</p>
@@ -87,7 +87,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     6. Limitation of Liability
                   </h2>
                   <ul className="list-disc list-inside space-y-2 ml-4">
@@ -97,7 +97,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     7. Privacy
                   </h2>
                   <p>
@@ -106,7 +106,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     8. Changes to Terms
                   </h2>
                   <p>
@@ -115,7 +115,7 @@ const TermsOfService = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     9. Governing Law
                   </h2>
                   <p>

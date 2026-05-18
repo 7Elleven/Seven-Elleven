@@ -56,3 +56,12 @@ export const preloadImages = (urls, { limit = 3 } = {}) => {
   const uniqueUrls = [...new Set(urls.filter(Boolean))].slice(0, limit);
   return Promise.allSettled(uniqueUrls.map((url) => preloadImage(url)));
 };
+
+export const preloadImagesBatched = async (urls, batchSize = 4) => {
+  const uniqueUrls = [...new Set(urls.filter(Boolean))];
+
+  for (let i = 0; i < uniqueUrls.length; i += batchSize) {
+    const batch = uniqueUrls.slice(i, i + batchSize);
+    await Promise.allSettled(batch.map((url) => preloadImage(url)));
+  }
+};

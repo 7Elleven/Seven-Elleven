@@ -72,7 +72,7 @@ const LazyImage = ({
       )}
       {status === 'error' && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-dark-blue-light text-3xl opacity-30"
+          className="absolute inset-0 flex items-center justify-center bg-dark-blue-light text-2xl opacity-30"
           aria-hidden="true"
         >
           📷

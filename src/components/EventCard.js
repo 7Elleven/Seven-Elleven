@@ -47,7 +47,7 @@ const EventCard = ({ event }) => {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-accent-blue/20 to-dark-blue-light">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-6xl opacity-20 group-hover:opacity-30 transition-opacity">
+              <div className="text-5xl opacity-20 group-hover:opacity-30 transition-opacity">
                 ⚽
               </div>
             </div>
@@ -73,7 +73,7 @@ const EventCard = ({ event }) => {
           <span className="text-gray-400 text-sm">📍 {event.location}</span>
         </div>
         
-        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-neon-blue transition-colors">
+        <h3 className="text-lg font-bold text-white mb-3 group-hover:text-neon-blue transition-colors">
           {event.title}
         </h3>
         

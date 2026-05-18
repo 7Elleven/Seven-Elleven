@@ -47,12 +47,12 @@ const Home = () => {
 
         <div className="container-custom relative z-10 text-center px-4">
           <div className="animate-float">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6">
               <span className="gradient-text">Where Football</span>
               <br />
               <span className="text-white">Meets Entertainment</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Events, Elevated. Premium events, immersive experiences, and a community 
               of fans that make every minute unforgettable.
             </p>
@@ -94,11 +94,11 @@ const Home = () => {
       <section className="section-padding bg-dark-blue-light">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               <span className="gradient-text">Featured</span>{' '}
               <span className="text-white">Experiences</span>
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-base max-w-2xl mx-auto">
               Experience football like never before with our curated selection of
               premium experiences and tournaments.
             </p>
@@ -111,7 +111,7 @@ const Home = () => {
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">⚠️</div>
+              <div className="text-5xl mb-4">⚠️</div>
               <p className="text-red-400 mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
@@ -122,7 +122,7 @@ const Home = () => {
             </div>
           ) : experiences.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">⚽</div>
+              <div className="text-5xl mb-4">⚽</div>
               <p className="text-gray-400">No experiences available at the moment.</p>
             </div>
           ) : (
@@ -147,10 +147,10 @@ const Home = () => {
       <section className="section-padding">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Why <span className="gradient-text">SevenElleven</span>?
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-base max-w-2xl mx-auto">
               We're not just event organizers—we're football enthusiasts creating
               unforgettable moments.
             </p>
@@ -181,8 +181,8 @@ const Home = () => {
                 key={index}
                 className="bg-dark-blue-light p-8 rounded-xl border border-accent-blue/20 card-hover text-center"
               >
-                <div className="text-6xl mb-4">{feature.icon}</div>
-                <h3 className="text-2xl font-bold text-white mb-4">
+                <div className="text-5xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-4">
                   {feature.title}
                 </h3>
                 <p className="text-gray-400">{feature.description}</p>
@@ -204,7 +204,7 @@ const Home = () => {
                 { number: '98%', label: 'Satisfaction' },
               ].map((stat, index) => (
                 <div key={index}>
-                  <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">
+                  <div className="text-3xl md:text-4xl font-bold gradient-text mb-2">
                     {stat.number}
                   </div>
                   <div className="text-gray-400">{stat.label}</div>
@@ -218,15 +218,15 @@ const Home = () => {
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-accent-blue/20 via-dark-blue-light to-accent-blue/20">
         <div className="container-custom text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
             Ready to Experience{' '}
             <span className="gradient-text">7Elleven Magic</span>?
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
             Join thousands of fans who have made unforgettable memories with
             SevenElleven.
           </p>
-          <Link to="/contact" className="btn-primary text-lg px-12">
+          <Link to="/contact" className="btn-primary px-10">
             Get In Touch
           </Link>
         </div>

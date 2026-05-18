@@ -3,8 +3,42 @@ import { db } from '../config/firebase';
 
 const galleryCache = new Map();
 const galleryRequests = new Map();
+let allGalleryFetchPromise = null;
 
 const getCacheKey = (categoryName) => categoryName.trim().toLowerCase();
+
+export const fetchAndCacheAllGalleryImages = async () => {
+  if (allGalleryFetchPromise) {
+    return allGalleryFetchPromise;
+  }
+
+  allGalleryFetchPromise = (async () => {
+    const galleryRef = collection(db, 'gallery');
+    const snapshot = await getDocs(galleryRef);
+    const imagesByCategory = new Map();
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const category = (data.category || '').trim();
+
+      if (!category || !Array.isArray(data.images)) {
+        return;
+      }
+
+      const cacheKey = getCacheKey(category);
+      const existing = imagesByCategory.get(cacheKey) || [];
+      imagesByCategory.set(cacheKey, [...existing, ...data.images.filter(Boolean)]);
+    });
+
+    imagesByCategory.forEach((images, cacheKey) => {
+      galleryCache.set(cacheKey, Array.from(new Set(images)));
+    });
+
+    return imagesByCategory;
+  })();
+
+  return allGalleryFetchPromise;
+};
 
 export const fetchGalleryImagesByCategory = async (categoryName) => {
   if (!categoryName) {
@@ -76,4 +110,14 @@ const fetchGalleryImagesFromFirestore = async (categoryName) => {
 export const clearGalleryCache = () => {
   galleryCache.clear();
   galleryRequests.clear();
+  allGalleryFetchPromise = null;
+};
+
+export const getCachedGalleryImages = (categoryName) => {
+  if (!categoryName) {
+    return null;
+  }
+
+  const cacheKey = getCacheKey(categoryName);
+  return galleryCache.has(cacheKey) ? galleryCache.get(cacheKey) : null;
 };

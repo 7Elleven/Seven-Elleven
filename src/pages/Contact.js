@@ -51,11 +51,11 @@ const Contact = () => {
         </div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
               <span className="gradient-text">Get In</span>{' '}
               <span className="text-white">Touch</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300">
               Have a question? Want to book an experience? We'd love to hear from
               you.
             </p>
@@ -70,7 +70,7 @@ const Contact = () => {
             {/* Contact Info */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-6">
+                <h2 className="text-2xl font-bold text-white mb-6">
                   Contact Information
                 </h2>
                 <p className="text-gray-400 mb-8">
@@ -87,9 +87,9 @@ const Contact = () => {
                     className="block bg-dark-blue-light p-6 rounded-xl border border-accent-blue/20 card-hover group"
                   >
                     <div className="flex items-start space-x-4">
-                      <div className="text-4xl">{info.icon}</div>
+                      <div className="text-3xl">{info.icon}</div>
                       <div>
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-neon-blue transition-colors">
+                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-neon-blue transition-colors">
                           {info.title}
                         </h3>
                         <p className="text-gray-400">{info.content}</p>
@@ -101,7 +101,7 @@ const Contact = () => {
 
               {/* Social Media */}
               <div>
-                <h3 className="text-xl font-bold text-white mb-4">
+                <h3 className="text-lg font-bold text-white mb-4">
                   Follow Us
                 </h3>
                 <div className="flex space-x-4">
@@ -128,7 +128,7 @@ const Contact = () => {
 
               {/* Office Hours */}
               <div className="bg-dark-blue-light p-6 rounded-xl border border-accent-blue/20">
-                <h3 className="text-xl font-bold text-white mb-4">
+                <h3 className="text-lg font-bold text-white mb-4">
                   Office Hours
                 </h3>
                 <div className="space-y-2 text-gray-400">

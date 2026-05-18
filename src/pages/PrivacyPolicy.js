@@ -11,11 +11,11 @@ const PrivacyPolicy = () => {
         </div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
               <span className="gradient-text">Privacy</span>{' '}
               <span className="text-white">Policy</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300">
+            <p className="text-lg md:text-xl text-gray-300">
               Effective Date: January 10, 2026
             </p>
           </div>
@@ -28,12 +28,12 @@ const PrivacyPolicy = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-dark-blue-light p-8 md:p-12 rounded-xl border border-accent-blue/20">
               <div className="space-y-8 text-gray-300 leading-relaxed">
-                <p className="text-lg">
+                <p className="text-base">
                   At SevenElleven, your privacy is important to us. This Privacy Policy explains how we collect, use, and protect the information of our users on our website and at our events.
                 </p>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     1. Information We Collect
                   </h2>
                   <p className="mb-4">We may collect the following types of information:</p>
@@ -46,7 +46,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     2. How We Use Your Information
                   </h2>
                   <p className="mb-4">We use your information to:</p>
@@ -60,7 +60,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     3. Sharing of Information
                   </h2>
                   <p className="mb-4">We do not sell your personal information. We may share data with:</p>
@@ -71,7 +71,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     4. Cookies and Tracking
                   </h2>
                   <p>
@@ -80,7 +80,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     5. Security
                   </h2>
                   <p>
@@ -89,7 +89,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     6. Your Rights
                   </h2>
                   <p>
@@ -98,7 +98,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     7. Children's Privacy
                   </h2>
                   <p>
@@ -107,7 +107,7 @@ const PrivacyPolicy = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-3xl font-display font-bold text-white mb-4">
+                  <h2 className="text-2xl font-display font-bold text-white mb-4">
                     8. Changes to This Policy
                   </h2>
                   <p>

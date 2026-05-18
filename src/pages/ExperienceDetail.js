@@ -1,11 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { fetchExperienceById } from '../services/experiencesService';
-import { fetchGalleryImagesByCategory } from '../services/galleryService';
+import {
+  fetchGalleryImagesByCategory,
+  getCachedGalleryImages,
+} from '../services/galleryService';
+import { ensureGalleryMetadata } from '../services/galleryPrefetchService';
 import { markImageCached, preloadImage, preloadImages } from '../utils/imageCache';
 
 const BOOKING_URL = 'https://sevenellevenke.hustlesasa.shop';
+
+const addSlideIndices = (previous, indices) => {
+  const nextSet = new Set(previous);
+  let changed = false;
+
+  indices.forEach((index) => {
+    if (!nextSet.has(index)) {
+      nextSet.add(index);
+      changed = true;
+    }
+  });
+
+  return changed ? nextSet : previous;
+};
 
 const ExperienceDetail = () => {
   const { id } = useParams();
@@ -22,6 +40,32 @@ const ExperienceDetail = () => {
   const [fullscreenImageIndex, setFullscreenImageIndex] = useState(null);
   const [fullscreenImages, setFullscreenImages] = useState([]);
   const [loadedSlideIndices, setLoadedSlideIndices] = useState(() => new Set());
+
+  const experienceTitle = experience?.title;
+  const posterImages = useMemo(
+    () => (Array.isArray(experience?.images) ? experience.images : []),
+    [experience?.images]
+  );
+
+  const slideshowImages = useMemo(() => {
+    const source =
+      galleryImages.length > 0
+        ? galleryImages
+        : galleryFetched
+          ? posterImages
+          : [];
+
+    return source.slice(0, 10);
+  }, [galleryImages, galleryFetched, posterImages]);
+
+  const slideshowImagesKey = useMemo(
+    () => slideshowImages.join('|'),
+    [slideshowImages]
+  );
+
+  const slideshowLength = slideshowImages.length;
+  const hasSlideshow = slideshowLength > 0;
+  const isSlideshowFromGallery = galleryImages.length > 0;
 
   useEffect(() => {
     const loadExperience = async () => {
@@ -47,7 +91,7 @@ const ExperienceDetail = () => {
     let cancelled = false;
 
     const loadGallery = async () => {
-      if (!experience || !experience.title) {
+      if (!experienceTitle) {
         setGalleryImages([]);
         setGalleryError(null);
         setGalleryLoading(false);
@@ -55,25 +99,36 @@ const ExperienceDetail = () => {
         return;
       }
 
-      setGalleryLoading(true);
-      setGalleryFetched(false);
-      setGalleryImages([]);
+      const cachedImages = getCachedGalleryImages(experienceTitle);
+
+      if (cachedImages) {
+        setGalleryImages(cachedImages);
+        setGalleryLoading(false);
+        setGalleryFetched(true);
+        setGalleryError(null);
+      } else {
+        setGalleryLoading(true);
+        setGalleryFetched(false);
+      }
 
       try {
-        const data = await fetchGalleryImagesByCategory(experience.title);
+        await ensureGalleryMetadata();
+        const data = await fetchGalleryImagesByCategory(experienceTitle);
+
         if (!cancelled) {
           setGalleryImages(data);
           setGalleryError(null);
+          setGalleryFetched(true);
         }
       } catch (err) {
         console.error('Error loading gallery images:', err);
         if (!cancelled) {
           setGalleryError('Failed to load gallery images.');
+          setGalleryFetched(true);
         }
       } finally {
         if (!cancelled) {
           setGalleryLoading(false);
-          setGalleryFetched(true);
         }
       }
     };
@@ -83,66 +138,38 @@ const ExperienceDetail = () => {
     return () => {
       cancelled = true;
     };
-  }, [experience]);
-
-  const images = experience?.images || [];
-  const slideshowSource =
-    galleryImages.length > 0
-      ? galleryImages
-      : galleryFetched
-        ? images
-        : [];
-  const slideshowImages = slideshowSource.slice(0, 10);
-  const slideshowLength = slideshowImages.length;
-  const hasSlideshow = slideshowImages.length > 0;
-  const isSlideshowFromGallery = galleryImages.length > 0;
+  }, [experienceTitle]);
 
   useEffect(() => {
-    if (slideshowImages.length === 0) {
+    if (!slideshowImagesKey) {
       setLoadedSlideIndices(new Set());
       return;
     }
 
-    const initialIndices = new Set([0]);
-    if (slideshowImages.length > 1) {
-      initialIndices.add(1);
-    }
-
-    setLoadedSlideIndices(initialIndices);
+    const initialIndices = slideshowLength > 1 ? [0, 1] : [0];
+    setLoadedSlideIndices(new Set(initialIndices));
     setSlideshowImageIndex(0);
     preloadImages(slideshowImages, { limit: 2 });
-  }, [slideshowImages]);
+  }, [slideshowImagesKey, slideshowLength, slideshowImages]);
 
   useEffect(() => {
-    if (slideshowImages.length === 0) {
+    if (!slideshowImagesKey) {
       return;
     }
 
     const current = slideshowImageIndex;
-    const next = (current + 1) % slideshowImages.length;
-    const prev = (current - 1 + slideshowImages.length) % slideshowImages.length;
+    const next = (current + 1) % slideshowLength;
+    const indices = [current, next];
 
-    setLoadedSlideIndices((previous) => {
-      const nextSet = new Set(previous);
-      nextSet.add(current);
-      nextSet.add(next);
-      if (slideshowImages.length > 2) {
-        nextSet.add(prev);
-      }
-      return nextSet;
-    });
+    if (slideshowLength > 2) {
+      indices.push((current - 1 + slideshowLength) % slideshowLength);
+    }
+
+    setLoadedSlideIndices((previous) => addSlideIndices(previous, indices));
 
     preloadImage(slideshowImages[current]).catch(() => {});
     preloadImage(slideshowImages[next]).catch(() => {});
-  }, [slideshowImageIndex, slideshowImages]);
-
-  useEffect(() => {
-    if (galleryImages.length === 0) {
-      return;
-    }
-
-    preloadImages(galleryImages, { limit: 4 });
-  }, [galleryImages]);
+  }, [slideshowImageIndex, slideshowImagesKey, slideshowLength, slideshowImages]);
 
   useEffect(() => {
     if (fullscreenImageIndex === null || fullscreenImages.length === 0) {
@@ -160,18 +187,14 @@ const ExperienceDetail = () => {
     preloadImages(urlsToPreload, { limit: 3 });
   }, [fullscreenImageIndex, fullscreenImages]);
 
-  // Auto-scroll images
   useEffect(() => {
     if (slideshowLength <= 1 || isPaused) {
       return;
     }
 
     const interval = setInterval(() => {
-      setSlideshowImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % slideshowLength;
-        return nextIndex;
-      });
-    }, 2500); // Change image every 2.5 seconds
+      setSlideshowImageIndex((prevIndex) => (prevIndex + 1) % slideshowLength);
+    }, 2500);
 
     return () => clearInterval(interval);
   }, [slideshowLength, isPaused]);
@@ -181,7 +204,7 @@ const ExperienceDetail = () => {
       return;
     }
 
-    const handleEscape = (event) => {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setFullscreenImageIndex(null);
         setFullscreenImages([]);
@@ -200,15 +223,15 @@ const ExperienceDetail = () => {
       }
     };
 
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [fullscreenImageIndex, fullscreenImages.length]);
 
   useEffect(() => {
-    if (slideshowImageIndex > slideshowImages.length - 1) {
+    if (slideshowImageIndex >= slideshowLength && slideshowLength > 0) {
       setSlideshowImageIndex(0);
     }
-  }, [slideshowImageIndex, slideshowImages.length]);
+  }, [slideshowImageIndex, slideshowLength]);
 
   const getStatusBadge = (status) => {
     const statusStyles = {
@@ -243,8 +266,8 @@ const ExperienceDetail = () => {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-white mb-4">
             {error || 'Experience Not Found'}
           </h2>
           <p className="text-gray-400 mb-6">
@@ -290,7 +313,7 @@ const ExperienceDetail = () => {
                       alt={`${experience.title} - ${index + 1}`}
                       className="absolute inset-0 w-full h-full object-cover"
                       decoding="async"
-                      fetchPriority={index === 0 ? 'high' : 'low'}
+                      loading={index === 0 ? 'eager' : 'lazy'}
                       onLoad={() => markImageCached(imageUrl)}
                     />
                   ) : isActive ? (
@@ -314,7 +337,7 @@ const ExperienceDetail = () => {
             <p className="inline-block text-xs sm:text-sm uppercase tracking-[0.2em] text-neon-blue mb-2">
               SevenElleven Experience
             </p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white leading-tight drop-shadow-md">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight drop-shadow-md">
               {experience.title}
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-gray-200 text-sm sm:text-base">
@@ -362,7 +385,7 @@ const ExperienceDetail = () => {
             <p className="mt-3 text-sm sm:text-base text-gray-200">
               {isSlideshowFromGallery
                 ? 'Showcasing event highlights from the gallery.'
-                : galleryFetched && images.length > 0
+                : galleryFetched && posterImages.length > 0
                   ? 'Showcasing event posters.'
                   : !galleryFetched
                     ? 'Loading gallery highlights...'
@@ -409,23 +432,23 @@ const ExperienceDetail = () => {
             {/* Description */}
             {experience.description && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-4">About This Experience</h2>
-                <p className="text-gray-300 text-lg leading-relaxed whitespace-pre-line">
+                <h2 className="text-xl font-bold text-white mb-4">About This Experience</h2>
+                <p className="text-gray-300 text-base leading-relaxed whitespace-pre-line">
                   {experience.description}
                 </p>
               </div>
             )}
 
             {/* Image Gallery */}
-            {images.length > 1 && (
+            {posterImages.length > 1 && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">Posters</h2>
+                <h2 className="text-xl font-bold text-white mb-6">Posters</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {images.map((imageUrl, index) => (
+                  {posterImages.map((imageUrl, index) => (
                     <button
                       key={index}
                       onClick={() => {
-                        setFullscreenImages(images);
+                        setFullscreenImages(posterImages);
                         setFullscreenImageIndex(index);
                       }}
                       className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
@@ -448,8 +471,8 @@ const ExperienceDetail = () => {
 
             {experience.status === 'past' && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">Gallery</h2>
-                {galleryLoading ? (
+                <h2 className="text-xl font-bold text-white mb-6">Gallery</h2>
+                {galleryLoading && galleryImages.length === 0 ? (
                   <div className="text-gray-400">Loading gallery...</div>
                 ) : galleryError ? (
                   <div className="text-red-400">{galleryError}</div>
@@ -474,6 +497,7 @@ const ExperienceDetail = () => {
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           wrapperClassName="w-full h-full"
                           rootMargin="300px"
+                          eager={index < 8}
                         />
                       </button>
                     ))}
@@ -486,7 +510,7 @@ const ExperienceDetail = () => {
             <div className="bg-dark-blue-light p-8 rounded-xl border border-accent-blue/20">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     Interested in This Experience?
                   </h3>
                   <p className="text-gray-400">
@@ -583,4 +607,3 @@ const ExperienceDetail = () => {
 };
 
 export default ExperienceDetail;
-

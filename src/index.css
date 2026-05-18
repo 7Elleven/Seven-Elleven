@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 15px;
+  }
+
   body {
-    @apply bg-dark-blue text-white font-sans;
+    @apply bg-dark-blue text-white font-sans text-base;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -14,11 +18,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-accent-blue hover:bg-light-blue text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-accent-blue hover:bg-light-blue text-white text-sm font-semibold py-2.5 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   .btn-secondary {
-    @apply bg-transparent border-2 border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105;
+    @apply bg-transparent border-2 border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-white text-sm font-semibold py-2.5 px-6 rounded-lg transition-all duration-300 transform hover:scale-105;
   }
   
   .section-padding {
