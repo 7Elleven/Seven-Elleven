@@ -52,7 +52,7 @@ const LazyImage = ({
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, [eager, shouldLoad, src]);
+  }, [eager, shouldLoad, src, rootMargin]);
 
   useEffect(() => {
     if (!src) {
