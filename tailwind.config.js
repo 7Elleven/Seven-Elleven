@@ -8,9 +8,9 @@ module.exports = {
       colors: {
         'dark-blue': '#0a1628',
         'dark-blue-light': '#1a2a3a',
-        'accent-blue': '#3b82f6',
-        'light-blue': '#60a5fa',
-        'neon-blue': '#00d4ff',
+        'accent-blue': '#2596be',
+        'light-blue': '#4aabcf',
+        'neon-blue': '#6ec8e0',
       },
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],

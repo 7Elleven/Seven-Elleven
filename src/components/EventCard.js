@@ -26,6 +26,10 @@ const EventCard = ({ event }) => {
   const imageUrl = event.images && event.images.length > 0 ? event.images[0] : null;
   const showImage = imageUrl && !imageError;
 
+  const attendeesText = event.attendees?.toString().trim();
+  const showAttendees =
+    attendeesText && attendeesText.toLowerCase() !== 'tba';
+
   return (
     <Link
       to={`/experiences/${event.id}`}
@@ -77,10 +81,16 @@ const EventCard = ({ event }) => {
           {event.description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <span>👥 {event.attendees || 'TBA'}</span>
-          </div>
+        <div
+          className={`flex items-center ${
+            showAttendees ? 'justify-between' : 'justify-end'
+          }`}
+        >
+          {showAttendees && (
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <span>👥 {attendeesText}</span>
+            </div>
+          )}
           <span className="text-accent-blue hover:text-neon-blue font-semibold text-sm transition-colors flex items-center space-x-1">
             <span>Learn More</span>
             <svg

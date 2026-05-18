@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import LazyImage from '../components/LazyImage';
 import { fetchExperienceById } from '../services/experiencesService';
 import { fetchGalleryImagesByCategory } from '../services/galleryService';
+import { markImageCached, preloadImage, preloadImages } from '../utils/imageCache';
 
 const BOOKING_URL = 'https://sevenellevenke.hustlesasa.shop';
 
@@ -15,9 +17,11 @@ const ExperienceDetail = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryLoading, setGalleryLoading] = useState(false);
+  const [galleryFetched, setGalleryFetched] = useState(false);
   const [galleryError, setGalleryError] = useState(null);
   const [fullscreenImageIndex, setFullscreenImageIndex] = useState(null);
   const [fullscreenImages, setFullscreenImages] = useState([]);
+  const [loadedSlideIndices, setLoadedSlideIndices] = useState(() => new Set());
 
   useEffect(() => {
     const loadExperience = async () => {
@@ -40,30 +44,121 @@ const ExperienceDetail = () => {
   }, [id]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadGallery = async () => {
       if (!experience || !experience.title) {
         setGalleryImages([]);
         setGalleryError(null);
+        setGalleryLoading(false);
+        setGalleryFetched(true);
         return;
       }
 
+      setGalleryLoading(true);
+      setGalleryFetched(false);
+      setGalleryImages([]);
+
       try {
-        setGalleryLoading(true);
         const data = await fetchGalleryImagesByCategory(experience.title);
-        setGalleryImages(data);
-        setGalleryError(null);
+        if (!cancelled) {
+          setGalleryImages(data);
+          setGalleryError(null);
+        }
       } catch (err) {
         console.error('Error loading gallery images:', err);
-        setGalleryError('Failed to load gallery images.');
+        if (!cancelled) {
+          setGalleryError('Failed to load gallery images.');
+        }
       } finally {
-        setGalleryLoading(false);
+        if (!cancelled) {
+          setGalleryLoading(false);
+          setGalleryFetched(true);
+        }
       }
     };
 
     loadGallery();
+
+    return () => {
+      cancelled = true;
+    };
   }, [experience]);
 
-  const slideshowLength = Math.min(galleryImages.length, 10);
+  const images = experience?.images || [];
+  const slideshowSource =
+    galleryImages.length > 0
+      ? galleryImages
+      : galleryFetched
+        ? images
+        : [];
+  const slideshowImages = slideshowSource.slice(0, 10);
+  const slideshowLength = slideshowImages.length;
+  const hasSlideshow = slideshowImages.length > 0;
+  const isSlideshowFromGallery = galleryImages.length > 0;
+
+  useEffect(() => {
+    if (slideshowImages.length === 0) {
+      setLoadedSlideIndices(new Set());
+      return;
+    }
+
+    const initialIndices = new Set([0]);
+    if (slideshowImages.length > 1) {
+      initialIndices.add(1);
+    }
+
+    setLoadedSlideIndices(initialIndices);
+    setSlideshowImageIndex(0);
+    preloadImages(slideshowImages, { limit: 2 });
+  }, [slideshowImages]);
+
+  useEffect(() => {
+    if (slideshowImages.length === 0) {
+      return;
+    }
+
+    const current = slideshowImageIndex;
+    const next = (current + 1) % slideshowImages.length;
+    const prev = (current - 1 + slideshowImages.length) % slideshowImages.length;
+
+    setLoadedSlideIndices((previous) => {
+      const nextSet = new Set(previous);
+      nextSet.add(current);
+      nextSet.add(next);
+      if (slideshowImages.length > 2) {
+        nextSet.add(prev);
+      }
+      return nextSet;
+    });
+
+    preloadImage(slideshowImages[current]).catch(() => {});
+    preloadImage(slideshowImages[next]).catch(() => {});
+  }, [slideshowImageIndex, slideshowImages]);
+
+  useEffect(() => {
+    if (galleryImages.length === 0) {
+      return;
+    }
+
+    preloadImages(galleryImages, { limit: 4 });
+  }, [galleryImages]);
+
+  useEffect(() => {
+    if (fullscreenImageIndex === null || fullscreenImages.length === 0) {
+      return;
+    }
+
+    const urlsToPreload = [fullscreenImages[fullscreenImageIndex]];
+    if (fullscreenImageIndex > 0) {
+      urlsToPreload.push(fullscreenImages[fullscreenImageIndex - 1]);
+    }
+    if (fullscreenImageIndex < fullscreenImages.length - 1) {
+      urlsToPreload.push(fullscreenImages[fullscreenImageIndex + 1]);
+    }
+
+    preloadImages(urlsToPreload, { limit: 3 });
+  }, [fullscreenImageIndex, fullscreenImages]);
 
   // Auto-scroll images
   useEffect(() => {
@@ -108,10 +203,6 @@ const ExperienceDetail = () => {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [fullscreenImageIndex, fullscreenImages.length]);
-
-  const images = experience?.images || [];
-  const slideshowImages = galleryImages.slice(0, 10);
-  const hasSlideshow = slideshowImages.length > 0;
 
   useEffect(() => {
     if (slideshowImageIndex > slideshowImages.length - 1) {
@@ -181,17 +272,33 @@ const ExperienceDetail = () => {
         onMouseLeave={() => setIsPaused(false)}
       >
         {hasSlideshow ? (
-          <div className="relative w-full h-full">
-            {slideshowImages.map((imageUrl, index) => (
-              <img
-                key={index}
-                src={imageUrl}
-                alt={`${experience.title} - ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                  slideshowImageIndex === index ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            ))}
+          <div className="relative w-full h-full bg-dark-blue-light">
+            {slideshowImages.map((imageUrl, index) => {
+              const isActive = slideshowImageIndex === index;
+              const shouldRender = loadedSlideIndices.has(index);
+
+              return (
+                <div
+                  key={`${imageUrl}-${index}`}
+                  className={`absolute inset-0 transition-opacity duration-700 ${
+                    isActive && shouldRender ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {shouldRender ? (
+                    <img
+                      src={imageUrl}
+                      alt={`${experience.title} - ${index + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      decoding="async"
+                      fetchPriority={index === 0 ? 'high' : 'low'}
+                      onLoad={() => markImageCached(imageUrl)}
+                    />
+                  ) : isActive ? (
+                    <div className="absolute inset-0 bg-dark-blue-light animate-pulse" aria-hidden="true" />
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
@@ -253,9 +360,13 @@ const ExperienceDetail = () => {
               )}
             </div>
             <p className="mt-3 text-sm sm:text-base text-gray-200">
-              {galleryImages.length > 0
+              {isSlideshowFromGallery
                 ? 'Showcasing event highlights from the gallery.'
-                : 'Gallery highlights will be available soon.'}
+                : galleryFetched && images.length > 0
+                  ? 'Showcasing event posters.'
+                  : !galleryFetched
+                    ? 'Loading gallery highlights...'
+                    : 'Gallery highlights will be available soon.'}
             </p>
           </div>
         </div>
@@ -323,10 +434,11 @@ const ExperienceDetail = () => {
                           : 'border-accent-blue/20 hover:border-accent-blue/50'
                       }`}
                     >
-                      <img
+                      <LazyImage
                         src={imageUrl}
                         alt={`${experience.title}, view ${index + 1}`}
                         className="w-full h-full object-cover"
+                        wrapperClassName="w-full h-full"
                       />
                     </button>
                   ))}
@@ -356,11 +468,12 @@ const ExperienceDetail = () => {
                         className="group relative aspect-square rounded-xl overflow-hidden border border-accent-blue/20"
                         aria-label={`Open gallery image ${index + 1}`}
                       >
-                        <img
+                        <LazyImage
                           src={imageUrl}
                           alt={`${experience.title}, gallery view ${index + 1}`}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
+                          wrapperClassName="w-full h-full"
+                          rootMargin="300px"
                         />
                       </button>
                     ))}
@@ -454,12 +567,15 @@ const ExperienceDetail = () => {
               &#8250;
             </button>
           )}
-          <img
-            src={fullscreenImages[fullscreenImageIndex]}
-            alt={`${experience.title} fullscreen view ${fullscreenImageIndex + 1}`}
-            className="max-w-full max-h-[90vh] sm:max-h-[92vh] object-contain rounded-lg"
-            onClick={(event) => event.stopPropagation()}
-          />
+          <div onClick={(event) => event.stopPropagation()}>
+            <LazyImage
+              src={fullscreenImages[fullscreenImageIndex]}
+              alt={`${experience.title} fullscreen view ${fullscreenImageIndex + 1}`}
+              className="max-w-full max-h-[90vh] sm:max-h-[92vh] object-contain rounded-lg mx-auto"
+              wrapperClassName="flex items-center justify-center max-w-full max-h-[90vh] sm:max-h-[92vh]"
+              eager
+            />
+          </div>
         </div>
       )}
     </div>
